@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	TYPE_SIMPLE = "simple"
-	TYPE_LRU    = "lru"
-	TYPE_LFU    = "lfu"
-	TYPE_ARC    = "arc"
+	TYPE_SIMPLE      = "simple"
+	TYPE_LRU         = "lru"
+	TYPE_LFU         = "lfu"
+	TYPE_ARC         = "arc"
+	TYPE_NEVEREXPIRE = "never_expire"
 )
 
 var KeyNotFoundError = errors.New("Key not found.")
@@ -121,6 +122,10 @@ func (cb *CacheBuilder) ARC() *CacheBuilder {
 	return cb.EvictType(TYPE_ARC)
 }
 
+func (cb *CacheBuilder) NeverExpire() *CacheBuilder {
+	return cb.EvictType(TYPE_NEVEREXPIRE)
+}
+
 func (cb *CacheBuilder) EvictedFunc(evictedFunc EvictedFunc) *CacheBuilder {
 	cb.evictedFunc = evictedFunc
 	return cb
@@ -169,6 +174,8 @@ func (cb *CacheBuilder) build() Cache {
 		return newLFUCache(cb)
 	case TYPE_ARC:
 		return newARC(cb)
+	case TYPE_NEVEREXPIRE:
+		return newNeverExpire(cb)
 	default:
 		panic("gcache: Unknown type " + cb.tp)
 	}
